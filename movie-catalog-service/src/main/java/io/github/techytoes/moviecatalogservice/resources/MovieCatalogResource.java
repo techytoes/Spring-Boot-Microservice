@@ -3,6 +3,7 @@ package io.github.techytoes.moviecatalogservice.resources;
 import io.github.techytoes.moviecatalogservice.models.CatalogItem;
 import io.github.techytoes.moviecatalogservice.models.Movie;
 import io.github.techytoes.moviecatalogservice.models.Rating;
+import io.github.techytoes.moviecatalogservice.models.UserRatings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,26 +24,13 @@ public class MovieCatalogResource {
 
     @RequestMapping("/{userID}")
     public List<CatalogItem> getCatalog(@PathVariable("userID") String userID) {
-//        return Collections.singletonList(
-//                new CatalogItem("Interstellar", "Some Sci-Fi", 5)
-//        );
+        UserRatings userRatings = restTemplate.getForObject("http://localhost:8082/ratings/users/" + userID, UserRatings.class);
 
-//        RestTemplate restTemplate = new RestTemplate();
-        // Get all ratings
-        List<Rating> ratings = Arrays.asList(
-                new Rating("abc", 4),
-                new Rating("ab", 5),
-                new Rating("cd", 3)
-        );
-
-        return ratings.stream().map((rating) -> {
+        return userRatings.getUserRatings().stream().map((rating) -> {
             Movie movie = restTemplate.getForObject("http://localhost:8081/movies/" + rating.getMovieId(), Movie.class);
             assert movie != null;
             return new CatalogItem(movie.getName(), movie.getDesc(), rating.getRating());
         }).collect(Collectors.toList());
 
-        // Fetch movies for these ratings using movieId
-
-        // Combine the 2 data
     }
 }
